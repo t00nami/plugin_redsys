@@ -87,3 +87,4 @@ public class PluginRedsysPlugin implements FlutterPlugin, MethodCallHandler,Acti
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
     activity = binding.getActivity();
   }
+}
