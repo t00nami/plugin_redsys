@@ -28,6 +28,57 @@ public class PluginRedsysPlugin implements FlutterPlugin, MethodCallHandler,Acti
     System.out.println("ON ATTACHED TO ENGINE");
     context = flutterPluginBinding.getApplicationContext();
   }
+
+  @Override
+  public void onMethodCall(@NonNull MethodCall call, @NonNull Result result)  {
+
+    if(call.method.equals("webPayment")) {
+
+      TPVVConfiguration.setLicense(call.argument("license"));
+
+
+      if(call.argument("environment").equals(TPVVConstants.ENVIRONMENT_REAL)){
+        System.out.println("REAL ENVIRONMENT");
+        TPVVConfiguration.setEnvironment(TPVVConstants.ENVIRONMENT_REAL);
+      }else{
+        System.out.println("TEST ENVIRONMENT");
+        TPVVConfiguration.setEnvironment(TPVVConstants.ENVIRONMENT_TEST);
+      }
+
+      String reference = "";
+      if(call.argument("reference").equals(TPVVConstants.REQUEST_REFERENCE)){
+        reference = TPVVConstants.REQUEST_REFERENCE;
+      }
+      TPVVConfiguration.setFuc(call.argument("fuc"));
+      TPVVConfiguration.setTerminal(call.argument("terminal"));
+      TPVVConfiguration.setMerchantUrl(call.argument("merchantUrl"));
+      TPVVConfiguration.setCurrency(call.argument("currency"));
+      TPVVConfiguration.setPaymentMethods(call.argument("paymentMethods"));
+      TPVVConfiguration.setMerchantData(call.argument("merchantData"));
+
+      Double amount = Double.parseDouble(call.argument("amount"))*100;
+
+      TPVV.doWebViewPayment(activity.getApplicationContext(), call.argument("order"), amount, TPVVConstants.PAYMENT_TYPE_NORMAL, reference, "Descripción", null, new IPaymentResult() {
+        @Override
+        public void paymentResultOK(ResultResponse response) {
+          result.success(new Gson().toJson(response));
+
+        }
+
+        @Override
+        public void paymentResultKO(ErrorResponse error) {
+          result.success(new Gson().toJson(error));
+        }
+      });
+
+
+
+
+    }else {
+      result.notImplemented();
+    }
+  }
+
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     channel.setMethodCallHandler(null);
